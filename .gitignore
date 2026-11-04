@@ -14,6 +14,10 @@ __pycache__/
 # Excel
 *.xlsx
 
+# Torch
+*.pt
+*.pth
+
 # Distribution / packaging
 .Python
 build/

@@ -1,7 +1,10 @@
 import os
 import pandas as pd
 import torch
+import openpyxl
 from torch.utils.data import Dataset
+import torchvision.transforms as transforms
+from torch.utils.data import random_split
 from PIL import Image
 
 class RobotDataset(Dataset):
@@ -26,3 +29,18 @@ class RobotDataset(Dataset):
         if self.transform:
             image = self.transform(image)
         return image, label
+
+def split_data(train_size, img_size):
+    transform = transforms.Compose([transforms.Resize((img_size, img_size)),transforms.ToTensor()])
+    dataset = RobotDataset(image_folder="Robot_images", excel_file="data_Uncanny_Valley.xlsx", transform=transform)
+    train_dataset, test_dataset = random_split(dataset, [train_size, len(dataset) - train_size])
+    return train_dataset, test_dataset
+
+def save_dataset(train_dataset, test_dataset):
+    torch.save(train_dataset, 'Train_test_data/train_dataset.pt')
+    torch.save(test_dataset, 'Train_test_data/test_dataset.pt')
+
+def load_dataset():
+    train_dataset = torch.load('Train_test_data/train_dataset.pt', weights_only=False)
+    test_dataset = torch.load('Train_test_data/test_dataset.pt', weights_only=False)
+    return train_dataset, test_dataset
