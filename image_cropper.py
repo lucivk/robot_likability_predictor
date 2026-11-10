@@ -4,8 +4,8 @@ import numpy as np
 import os
 
 # Get the source and target directories
-source_dir = 'Robot_images_uncropped'
-target_dir = 'Robot_images'
+source_dir = 'Test_images_uncropped'
+target_dir = 'Test_images'
 # Iterate over images in the source directory
 images = Path(source_dir).glob('*.jpg')
 for image in images:
