@@ -46,14 +46,21 @@ class TestImageDataset(Dataset):
         return image, image_name
 
 
-def split_data(image_folder, excel_file, train_size, img_size):
-    train_transform = transforms.Compose([
-        transforms.Resize((img_size, img_size)),
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomRotation(degrees=5),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
+def split_data(image_folder, excel_file, train_size, img_size, augmentation):
+    if augmentation == 'Y':
+        train_transform = transforms.Compose([
+            transforms.Resize((img_size, img_size)),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomRotation(degrees=5),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+    else:
+        train_transform = transforms.Compose([
+            transforms.Resize((img_size, img_size)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
     test_transform = transforms.Compose([
         transforms.Resize((img_size, img_size)),
         transforms.ToTensor(),
@@ -61,19 +68,20 @@ def split_data(image_folder, excel_file, train_size, img_size):
     ])
     train_dataset = RobotDataset(image_folder, excel_file, train_transform)
     test_dataset = RobotDataset(image_folder, excel_file, test_transform)
-    indices = torch.randperm(len(train_dataset)).tolist()
+    generator = torch.Generator().manual_seed(66)
+    indices = torch.randperm(len(train_dataset), generator=generator).tolist()
     train_indices = indices[:train_size]
     test_indices = indices[train_size:]
     train_dataset = Subset(train_dataset, train_indices)
     test_dataset = Subset(test_dataset, test_indices)
     return train_dataset, test_dataset
 
-def save_split(base_dir, train_dataset, test_dataset):
-    torch.save(train_dataset, f'{base_dir}/train_dataset.pt')
+def save_split(base_dir, train_dataset, test_dataset, augmentation):
+    torch.save(train_dataset, f'{base_dir}/train_dataset_aug{augmentation}.pt')
     torch.save(test_dataset, f'{base_dir}/test_dataset.pt')
     return
 
-def load_split(base_dir):
-    train_dataset = torch.load(f'{base_dir}/train_dataset.pt', weights_only=False)
+def load_split(base_dir, augmentation):
+    train_dataset = torch.load(f'{base_dir}/train_dataset_aug{augmentation}.pt', weights_only=False)
     test_dataset = torch.load(f'{base_dir}/test_dataset.pt', weights_only=False)
     return train_dataset, test_dataset
